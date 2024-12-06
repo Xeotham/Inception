@@ -1,0 +1,41 @@
+services:
+  nginx:
+    build: requirements/NGINX
+    container_name: nginx
+    ports:
+      - "443:443"
+    env_file: ".env"
+    depends_on:
+      - wordpress
+    volumes:
+      - /home/mhaouas/data/web:/var/www/html
+    networks:
+      inception:
+    restart: always
+
+  wordpress:
+    build: requirements/WordPress
+    container_name: wordpress
+    env_file: ".env"
+    depends_on:
+      - mariadb
+    volumes:
+      - /home/mhaouas/data/web:/var/www/html
+    networks:
+      inception:
+    restart: always
+
+  mariadb:
+    build: requirements/MariaDB
+    container_name: mariadb
+    env_file: ".env"
+    privileged: true
+    volumes:
+      - /home/mhaouas/data/database:/usr/local/mysql/var
+    networks:
+      inception:
+    restart: always
+
+networks:
+  inception:
+    driver: bridge

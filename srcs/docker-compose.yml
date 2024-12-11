@@ -1,4 +1,16 @@
 services:
+  adminer:
+    build: requirements/bonus/Adminer
+    container_name: adminer
+    env_file: ".env"
+    depends_on:
+      - mariadb
+    volumes:
+      - /home/mhaouas/data/web:/var/www/html
+    networks:
+      inception:
+    restart: always
+
   nginx:
     build: requirements/NGINX
     container_name: nginx
@@ -7,6 +19,7 @@ services:
     env_file: ".env"
     depends_on:
       - wordpress
+      - adminer
     volumes:
       - /home/mhaouas/data/web:/var/www/html
     networks:

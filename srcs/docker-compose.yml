@@ -1,53 +1,70 @@
 services:
-  adminer:
-    build: requirements/bonus/Adminer
-    container_name: adminer
-    env_file: ".env"
-    depends_on:
-      - mariadb
-    volumes:
-      - /home/mhaouas/data/web:/var/www/html
-    networks:
-      inception:
-    restart: always
-
   nginx:
-    build: requirements/NGINX
+    build:
+      context: requirements/nginx
     container_name: nginx
     ports:
       - "443:443"
     env_file: ".env"
     depends_on:
       - wordpress
-      - adminer
     volumes:
-      - /home/mhaouas/data/web:/var/www/html
+      - wp:/var/www/html
     networks:
       inception:
     restart: always
+    init: true
 
   wordpress:
-    build: requirements/WordPress
+    build: 
+      context: requirements/wordpress
+      args:
+        - GL_USER=${GL_USER}
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
     container_name: wordpress
     env_file: ".env"
     depends_on:
-      - mariadb
+        mariadb:
+            condition: service_healthy
     volumes:
-      - /home/mhaouas/data/web:/var/www/html
+      - wp:/var/www/html
     networks:
       inception:
     restart: always
+    init: true
 
   mariadb:
-    build: requirements/MariaDB
+    build:
+      context: requirements/mariadb
     container_name: mariadb
     env_file: ".env"
     privileged: true
     volumes:
-      - /home/mhaouas/data/database:/usr/local/mysql/var
+      - mariadb:/usr/local/mysql/var
     networks:
       inception:
     restart: always
+    init: true
+    healthcheck:
+        test:		"mariadb-admin ping"
+        interval:	5s
+        timeout:	1m
+        retries:	3
+
+volumes:
+  mariadb:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/mhaouas/.data/database
+      o: bind
+  wp:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/mhaouas/.data/web
+      o: bind
 
 networks:
   inception:

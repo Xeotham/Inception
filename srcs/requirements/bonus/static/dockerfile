@@ -1,0 +1,17 @@
+FROM		    alpine:3.19.4
+
+# Updating the existing package
+RUN				[ "apk", "update" ]
+RUN				[ "apk", "upgrade" ]
+
+RUN				[ "apk", "add", "npm" ]
+
+RUN				[ "npm", "install", "-g", "http-server" ]
+
+RUN				[ "mkdir", "-p", "/var/www", "/var/www/html" ]
+
+WORKDIR			/var/www/html
+
+ADD				[ "conf/index.html", "." ]
+
+CMD				["http-server", "-p", "8080", "-d", "/var/www/html"]

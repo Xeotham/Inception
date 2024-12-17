@@ -1,0 +1,151 @@
+services:
+  static:
+    build:
+      context: requirements/bonus/static
+    container_name: static
+    ports:
+      - "8080"
+    networks:
+      inception:
+    restart: always
+    init: true
+
+  portainer:
+    build:
+      context: requirements/bonus/portainer
+    container_name: portainer
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    networks:
+      inception:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    init: true
+
+  ftp:
+    build:
+      context: requirements/bonus/ftp
+      args:
+        - GL_USER=${GL_USER}
+        - USER_ID=${USER_ID}
+        - USER_PASS=${USER_PASS}
+    container_name: ftp
+    env_file: ".env"
+    ports:
+        - "21:21"
+    depends_on:
+      - wordpress
+    networks:
+      inception:
+    volumes:
+      - wp:/var/www/html
+    restart: always
+    init: true
+
+  redis:
+    build:
+      context: requirements/bonus/redis
+      args:
+        - GL_USER=${GL_USER}
+        - USER_ID=${USER_ID}
+    container_name: redis
+    env_file: ".env"
+    ports:
+      - "6379:6379"
+    networks:
+      inception:
+    restart: always
+    init: true
+
+  adminer:
+    build:
+      context: requirements/bonus/adminer
+      args:
+        - GL_USER=${GL_USER}
+        - USER_ID=${USER_ID}
+    container_name: adminer
+    env_file: ".env"
+    ports:
+      - "9000"
+    depends_on:
+        mariadb:
+            condition: service_healthy
+    networks:
+      inception:
+    restart: always
+    init: true
+
+  nginx:
+    build:
+      context: requirements/nginx
+    container_name: nginx
+    ports:
+      - "443:443"
+    env_file: ".env"
+    depends_on:
+      - wordpress
+      - adminer
+    volumes:
+      - wp:/var/www/html
+    networks:
+      inception:
+    restart: always
+    init: true
+
+  wordpress:
+    build: 
+      context: requirements/wordpress
+      args:
+        - GL_USER=${GL_USER}
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
+    container_name: wordpress
+    env_file: ".env"
+    depends_on:
+        mariadb:
+            condition: service_healthy
+    volumes:
+      - wp:/var/www/html
+    networks:
+      inception:
+    restart: always
+    init: true
+
+  mariadb:
+    build:
+      context: requirements/mariadb
+    container_name: mariadb
+    env_file: ".env"
+    privileged: true
+    volumes:
+      - mariadb:/usr/local/mysql/var
+    networks:
+      inception:
+    restart: always
+    init: true
+    healthcheck:
+        test:		"mariadb-admin ping"
+        interval:	5s
+        timeout:	1m
+        retries:	3
+
+volumes:
+  mariadb:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/mhaouas/.data/database
+      o: bind
+  wp:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/mhaouas/.data/web
+      o: bind
+
+
+networks:
+  inception:
+    driver: bridge

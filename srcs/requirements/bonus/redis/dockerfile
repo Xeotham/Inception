@@ -1,0 +1,20 @@
+FROM		    alpine:3.19.4
+
+ARG GL_USER=${GL_USER}
+ARG USER_ID=${USER_ID}
+
+# Updating the existing package
+RUN				[ "apk", "update" ]
+RUN				[ "apk", "upgrade" ]
+
+RUN				adduser -u ${USER_ID} -D ${GL_USER}
+
+RUN				[ "apk", "add", "redis" ]
+RUN				[ "apk", "add", "shadow" ]
+
+RUN				[ "rm", "-f", "/etc/redis.conf" ]
+COPY			[ "conf/redis.conf", "/etc/redis.conf" ]
+
+RUN				chown -R ${GL_USER}:${GL_USER} /run/redis/ /var/lib/redis
+
+CMD				[ "redis-server", "/etc/redis.conf" ]

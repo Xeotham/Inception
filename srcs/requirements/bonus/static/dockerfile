@@ -4,14 +4,20 @@ FROM		    alpine:3.19.4
 RUN				[ "apk", "update" ]
 RUN				[ "apk", "upgrade" ]
 
+# Install NPM
 RUN				[ "apk", "add", "npm" ]
 
+# Install http-server
 RUN				[ "npm", "install", "-g", "http-server" ]
 
-RUN				[ "mkdir", "-p", "/var/www", "/var/www/html" ]
+# Create the static_page directory
+RUN				[ "mkdir", "-p", "/var/www", "/var/www/html", "/var/www/html/static_page" ]
 
-WORKDIR			/var/www/html
+# Set it to the working directory
+WORKDIR			/var/www/html/static_page
 
-ADD				[ "conf/index.html", "." ]
+# Add the html file
+ADD				[ "conf/index.html", "/var/www/html/static_page" ]
 
-CMD				["http-server", "-p", "8080", "-d", "/var/www/html"]
+# Launch http-server
+CMD				[ "http-server", "-p", "8080", "-d", "false" ]

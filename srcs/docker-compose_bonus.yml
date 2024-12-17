@@ -4,9 +4,11 @@ services:
       context: requirements/bonus/static
     container_name: static
     ports:
-      - "8080"
+      - "8080:8080"
     networks:
       inception:
+    volumes:
+      - wp:/var/www/html
     restart: always
     init: true
 

@@ -28,9 +28,10 @@ help:
 	@ echo 			"┃ - $(BLUE)down: $(CYAN)End services.							$(ORANGE)┃"
 	@ echo 			"┃	- $(BLUE)down_manda: $(CYAN)End only mandatory part services.			$(ORANGE)┃"
 	@ echo 			"┃	- $(BLUE)down_bonus: $(CYAN)End bonus part services.				$(ORANGE)┃"
+	@ echo 			"┃ - $(BLUE)re: $(CYAN)End and restart services.					$(ORANGE)┃"
 	@ echo 			"┃ - $(BLUE)logs: $(CYAN)Create logfiles with docker logs.				$(ORANGE)┃"
 	@ echo 			"┃ - $(BLUE)rm_logs: $(CYAN)Delete the logs files.					$(ORANGE)┃"
-	@ echo 			"┃ - $(BLUE)static_page: $(CYAN)Show the link to see the static page.			$(ORANGE)┃"
+	@ echo 			"┃ - $(BLUE)clean: $(CYAN)Clean all.							$(ORANGE)┃"
 	@ echo "$(ORANGE)┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
 up:
@@ -109,15 +110,6 @@ logs:
 	fi
 	@ echo "$(DARK_GREEN)Logs created!$(BASE_COLOR)"
 
-static_page:
-	@ if [ -f ./.DontWorryAboutThisFile ]; then \
-		echo "$(GREEN)You can see the static page on:$(DARK_YELLOW)"; \
-		docker logs static | grep "http://"; \
-	else \
-		echo "$(RED)You haven't build the bonus part" ;\
-	fi
-	@ echo -n "$(BASE_COLOR)"
-
 rm_logs:
 	@ echo "$(RED)Deleting logs...$(BASE_COLOR)"
 	@ rm -f adminer.log ftp.log portainer.log redis.log static_page.log mariadb.log nginx.log wordpress.log
@@ -125,10 +117,19 @@ rm_logs:
 
 clean: down
 	@ echo "$(RED)Removing files in .data...$(BASE_COLOR)"
-	@ sudo rm -rf ./.data/database/* ./.data/web/*
+	@ sudo rm -rf ~/.data/database/* ~/.data/web/*
 	@ echo "$(RED)Removing all docker image...$(BASE_COLOR)"
 	@ docker system prune -f
 	@ echo "$(GREEN)All cleaned !$(BASE_COLOR)"
 
+re:
+	@ if [ -f ./.DontWorryAboutThisFile ]; then \
+		$(MAKE) down; \
+		$(MAKE) up_bonus;\
+	else \
+		$(MAKE) down; \
+		$(MAKE) up_manda;\
+	fi
+
 .PHONY:
-	help up down up_manda down_manda up_bonus down_bonus
+	help up down up_manda down_manda up_bonus down_bonus logs rm_logs clean re

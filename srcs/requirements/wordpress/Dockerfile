@@ -11,11 +11,11 @@ RUN				[ "apk", "upgrade" ]
 # Create a user
 RUN				adduser -u ${USER_ID} -D ${GL_USER}
 
-# Install all PhP and Mariadb
+# Install all PhP, Mariadb and redis (Bonus)
 RUN				[ "apk", "add", "php82", "php82-fpm", "php82-mysqli", "php82-json", "php82-curl", "php82-dom",\
 				"php82-exif", "php82-fileinfo", "php82-mbstring", "php82-openssl", "php82-xml", "php82-zip",\
 				"php82-mbstring", "php82-phar", "php82-redis", "php82-tokenizer", "php82-ctype" ]
-RUN				[ "apk", "add", "mariadb-client" ]
+RUN				[ "apk", "add", "mariadb-client" ] 
 RUN				[ "apk", "add", "redis" ]
 
 # Install wget to get the WordPress package and tar to uncompress it

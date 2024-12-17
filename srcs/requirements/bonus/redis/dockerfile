@@ -7,14 +7,19 @@ ARG USER_ID=${USER_ID}
 RUN				[ "apk", "update" ]
 RUN				[ "apk", "upgrade" ]
 
+# Create a User
 RUN				adduser -u ${USER_ID} -D ${GL_USER}
 
+# Install redis and Shadow
 RUN				[ "apk", "add", "redis" ]
 RUN				[ "apk", "add", "shadow" ]
 
+# Replace the redis comfiguration file
 RUN				[ "rm", "-f", "/etc/redis.conf" ]
 COPY			[ "conf/redis.conf", "/etc/redis.conf" ]
 
+# Change the own of redis
 RUN				chown -R ${GL_USER}:${GL_USER} /run/redis/ /var/lib/redis
 
+# Launch the redis server
 CMD				[ "redis-server", "/etc/redis.conf" ]
